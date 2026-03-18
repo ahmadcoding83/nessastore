@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <section class="space-y-3">
     <article class="card" v-for="order in orders" :key="order.id">
       <div class="flex flex-wrap items-start justify-between gap-4">
@@ -63,7 +63,17 @@ async function fetchOrders() {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  orders.value = (data ?? []) as AdminOrder[];
+  
+  // FIX: Supabase returns nested items as arrays sometimes, especially when joining
+  const mapped = (data ?? []).map((o: any) => ({
+    ...o,
+    order_items: (o.order_items ?? []).map((i: any) => ({
+      ...i,
+      products: Array.isArray(i.products) ? i.products[0] : i.products
+    }))
+  }));
+
+  orders.value = mapped as AdminOrder[];
 }
 
 async function updateStatus(order: AdminOrder) {

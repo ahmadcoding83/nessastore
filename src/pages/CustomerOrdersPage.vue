@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container-shell py-6">
     <div class="mb-3 flex items-center justify-between gap-3">
       <h1 class="text-2xl font-black text-slate-900">Pesanan Saya</h1>
@@ -64,7 +64,17 @@ async function fetchOrders() {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  orders.value = (data ?? []) as CustomerOrder[];
+  
+  // FIX: Supabase select on nested object returns an array, but we expect a single object
+  const mapped = (data ?? []).map((o: any) => ({
+    ...o,
+    order_items: (o.order_items ?? []).map((i: any) => ({
+      ...i,
+      products: Array.isArray(i.products) ? i.products[0] : i.products
+    }))
+  }));
+
+  orders.value = mapped as CustomerOrder[];
 }
 
 onMounted(fetchOrders);
