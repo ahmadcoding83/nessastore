@@ -1,0 +1,5 @@
+﻿[functions.create-midtrans-token]
+verify_jwt = true
+
+[functions.midtrans-webhook]
+verify_jwt = false

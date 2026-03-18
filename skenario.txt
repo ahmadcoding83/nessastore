@@ -1,0 +1,40 @@
+1. Arsitektur Sistem (The Engine)
+Saya akan memiliki satu sistem pusat yang dibangun dengan Vue.js + Supabase, namun memiliki dua wajah yang berbeda:
+Wajah A (Dashboard Admin): Tempat Saya mengelola stok dropship, memasukkan link marketplace(shopee,tiktok,tokopedia,lazada) dan melihat laporan Midtrans.
+Wajah B (Etalase Pengunjung): Website yang sangat cepat (Vercel) di mana pengunjung bisa melihat barang pilihan Saya.
+
+2. Strategi Produk: "The Bait & The Hook"Ini adalah strategi agar toko Saya tidak kalah saing dan tetap untung:
+A. Produk Bait (Umpan - Affiliate (shopee,tiktok,tokopedia,lazada))
+ - Jenis:Barang elektronik atau produk viral di (shope,tiktok,tokopedia,lazada).
+ - Fitur Smart Price: Saya menggunakan script Python untuk mengecek harga termurah di Shopee setiap hari.
+ - Tujuan: Menarik orang datang ke web Saya karena Saya menyediakan info "Harga Termurah Hari Ini". Saya dapat komisi jika mereka klik link tersebut.
+
+B. Produk Hook (Pancingan - Dropshipping)
+ -Jenis: Produk unik atau niche (misal: alat rumah tangga unik) yang tidak mudah dibandingkan harganya. 
+ -Pembayaran: Menggunakan Midtrans. Uang masuk langsung ke kantong Saya dulu, baru Saya belikan ke supplier.
+ -Tujuan: Mendapatkan profit maksimal (bukan cuma komisi 3-5% seperti affiliate).
+
+3. Alur Kerja Teknis (Step-by-Step)
+ Fase 1: Input Data (Sekarang)
+  -Saya input produk di Dashboard Vue yang sudah Saya buat.
+  -Jika itu Dropship, Saya isi harga jual dan harga modal.
+  -Jika itu Stock, Product toko saya sendiri
+  -Jika itu Digital, kirim file/link digital setelah bayar.
+  -Jika itu Affiliate, Saya masukkan Link Affiliate (shope,tiktok,tokopedia,lazada) dan centang "Smart Price".
+
+ Fase 2: Otomasi Smart Price (The Brain)
+  - Setiap malam (menggunakan cron job), script Python Saya akan memindai link-link (shope,tiktok,tokopedia,lazada) tersebut.Scraper (Python): Kita buat script yang bisa mendeteksi: "Kalau link-nya dari tiktok.com, gunakan fungsi A. Kalau dari shopee.co.id, gunakan fungsi B
+  - Script mengambil harga terbaru dan meng-update database Supabase.
+  - Di website pengunjung, harga akan otomatis berubah dan ada label: "Update Terakhir: 1 jam yang lalu". Ini membangun kepercayaan pembeli.Fase 
+3: Transaksi & CRM
+  -Jika user klik Affiliate: Mereka dilempar ke marketplace(shopee,tiktok,tokopedia,lazada). Tugas Saya selesai, tinggal tunggu komisi cair.
+  -Jika user beli Dropship: Mereka bayar via Midtrans (QRIS/VA).
+  -Jika user beli Digital: Mereka bayar via Midtrans (QRIS/VA).
+  -Jika user beli(toko sendiri): Mereka bayar via Midtrans (QRIS/VA). 
+  -WhatsApp Integration: Begitu bayar, sistem Saya (via Supabase Edge Function) otomatis mengirim pesan WA: "Halo Ahmad, pesanan sepatu Saya sudah kami terima. Mohon tunggu resi pengirimannya ya!"
+
+4. Rencana Pengembangan Kedepan (Roadmap) bertahap :
+   1 MVP (Minimum Viable Product)Web jalan, bisa input produk, bisa bayar pakai Midtrans Sandbox.
+   2 Smart Price EngineScript Python otomatis update harga marketplace(shopee,tiktok,tokopedia,lazada) ke Supabase.
+   3 CRM & SEOIntegrasi WhatsApp otomatis & optimasi agar web muncul di Google.
+   4 SaaS ReadySistem dibuat agar teman Saya juga bisa "buka cabang" toko dengan sistem Saya.
