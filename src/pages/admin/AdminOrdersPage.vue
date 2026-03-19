@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { supabase } from "@/lib/supabase";
 import { buildSupplierOrderTemplate } from "@/utils/orderTemplate";
 import type { OrderItem, OrderStatus } from "@/types/db";
@@ -102,5 +102,23 @@ async function orderToSupplier(order: AdminOrder) {
   await updateStatus(order);
 }
 
-onMounted(fetchOrders);
+let realtimeChannel: any = null;
+
+onMounted(async () => {
+  await fetchOrders();
+  
+  // Realtime subscription for new orders
+  realtimeChannel = supabase
+    .channel("admin-orders")
+    .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+      fetchOrders();
+    })
+    .subscribe();
+});
+
+onUnmounted(() => {
+  if (realtimeChannel) {
+    supabase.removeChannel(realtimeChannel);
+  }
+});
 </script>

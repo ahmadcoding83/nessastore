@@ -1,0 +1,21 @@
+Bosan dengan aplikasi kasir yang lambat, kaku, dan boros RAM? NessaPOS adalah revolusi aplikasi kasir desktop yang dibangun dengan teknologi Wails (Go + Vue.js). Menghadirkan kecepatan aplikasi native dengan estetika antarmuka website modern sekelas startup besar.
+Dirancang khusus oleh pengembang berpengalaman di dunia perbankan untuk memastikan Keamanan Data dan Kecepatan Transaksi tanpa kompromi.
+✨ Fitur Unggulan NessaPOS:
+Engine Go (Golang): Pemrosesan data transaksi secepat kilat. Tahan banting untuk ribuan data produk.
+Modern Web UI (Vue.js): Tampilan bersih, intuitif, dan user-friendly. Karyawan hanya butuh 5 menit untuk belajar.
+Ultra Lightweight: Jauh lebih ringan dibanding aplikasi berbasis Electron. Tidak membuat laptop panas atau lemot.
+Pusat Analisa & Laporan: Pantau stok kritis, barang fast moving, hingga laporan laba rugi dalam satu dashboard cantik.
+Offline First: Data tersimpan aman di lokal (SQLite).
+💳 Paket Lisensi & HargaPilih paket yang paling sesuai dengan skala bisnis:
+FREE TRIAL Rp 0 Coba Fitur Penuh (Full Version) selama 3 - 7 Hari.
+SUBSCRIPTION (1 Bulan)Rp 75.000 Cocok untuk bisnis musiman atau tahap uji coba.
+SUBSCRIPTION (1 Tahun)Rp 650.000 Hemat 27%! Sudah termasuk update fitur terbaru.
+LIFETIME (Jual Putus)Rp 2.500.000 Investasi Terbaik. Sekali bayar untuk selamanya (1 Device).
+
+Spesifikasi Sistem:
+OS: Windows 10/11 (32/64 bit).
+Hardware: Printer Thermal (58/80mm), Barcode Scanner
+Tech Stack: Wails Framework, Go Backend, Vue.js Frontend.
+
+https://drive.google.com/file/d/1b_AZmKkJYneyERA6OpvTHZfiEjMyGPEI/view?usp=drive_link
+🚀 NessaPOS Desktop: Performa Enterprise, Tampilan Web Modern

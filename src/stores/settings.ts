@@ -6,10 +6,14 @@ export const useSettingsStore = defineStore("settings", () => {
   const store = ref<any>(null);
   const loading = ref(false);
 
-  async function fetchSettings() {
+  async function fetchSettings(userId?: string) {
     loading.value = true;
     try {
-      const { data, error } = await supabase.from("stores").select("*").maybeSingle();
+      let query = supabase.from("stores").select("*");
+      if (userId) {
+        query = query.eq("owner_id", userId);
+      }
+      const { data, error } = await query.limit(1).maybeSingle();
       if (error) throw error;
       if (data) {
         store.value = data;

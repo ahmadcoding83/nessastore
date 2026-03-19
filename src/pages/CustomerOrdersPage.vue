@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { supabase } from "@/lib/supabase";
 import type { AppOrder, OrderItem, Product } from "@/types/db";
@@ -74,8 +74,26 @@ async function fetchOrders() {
     }))
   }));
 
-  orders.value = mapped as CustomerOrder[];
+  orders.value = mapped as unknown as CustomerOrder[];
 }
 
-onMounted(fetchOrders);
+let realtimeChannel: any = null;
+
+onMounted(async () => {
+  await fetchOrders();
+
+  // Subscribe to changes in orders
+  realtimeChannel = supabase
+    .channel("customer-orders")
+    .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+      fetchOrders();
+    })
+    .subscribe();
+});
+
+onUnmounted(() => {
+  if (realtimeChannel) {
+    supabase.removeChannel(realtimeChannel);
+  }
+});
 </script>

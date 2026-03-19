@@ -1,7 +1,8 @@
-﻿import { functionsBaseUrl, supabase } from "@/lib/supabase";
+import { functionsBaseUrl, supabase } from "@/lib/supabase";
 
 interface CheckoutPayload {
   customer_name: string;
+  customer_email: string;
   phone: string;
   address: string;
   items: Array<{ product_id: string; qty: number }>;

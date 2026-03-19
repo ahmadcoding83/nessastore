@@ -152,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth";
 import { useProductStore } from "@/stores/product";
@@ -165,51 +165,75 @@ const settingsStore = useSettingsStore();
 const loading = ref(true);
 const saving = ref(false);
 const showSuccess = ref(false);
+const errorMsg = ref("");
 
 const form = reactive({
   id: "",
+  owner_id: "",
   name: "",
   description: "",
   logo_url: "",
+  subdomain: "",
   shopee_affiliate_id: "",
   tiktok_affiliate_id: ""
 });
 
 async function fetchStoreSettings() {
+  // 1. DONT PROCEED if user ID is missing (Prevents empty store creation on refresh)
+  if (!authStore.user?.id) {
+    console.log("[Settings] Waiting for session...");
+    return;
+  }
+  
   loading.value = true;
+  errorMsg.value = ""; // Reset error message
+  
   try {
-    const { data, error } = await supabase
+    // 2. SEARCH FOR EXISTING STORE
+    const { data: existingStore, error: searchError } = await supabase
       .from("stores")
       .select("*")
-      .eq("owner_id", authStore.user?.id)
+      .eq("owner_id", authStore.user.id)
+      .limit(1)
       .maybeSingle();
 
-    if (error) throw error;
-    
-    if (data) {
-      form.id = data.id;
-      form.name = data.name;
-      form.description = data.description || "";
-      form.logo_url = data.logo_url || "";
-      form.shopee_affiliate_id = data.shopee_affiliate_id || "";
-      form.tiktok_affiliate_id = data.tiktok_affiliate_id || "";
+    if (searchError) throw searchError;
+
+    if (existingStore) {
+      console.log("[Settings] Found existing store:", existingStore.id);
+      form.id = existingStore.id;
+      form.owner_id = existingStore.owner_id;
+      form.name = existingStore.name;
+      form.description = existingStore.description || "";
+      form.logo_url = existingStore.logo_url || "";
+      form.shopee_affiliate_id = existingStore.shopee_affiliate_id || "";
+      form.tiktok_affiliate_id = existingStore.tiktok_affiliate_id || "";
+      form.subdomain = existingStore.subdomain || "";
     } else {
-       const { data: newStored, error: createError } = await supabase
-         .from("stores")
-         .insert({
-           owner_id: authStore.user?.id,
-           name: "Toko Baru Saya",
-           subdomain: `store-${Math.floor(Math.random() * 1000)}`
-         })
-         .select()
-         .single();
-       
-       if (createError) throw createError;
-       form.id = newStored.id;
-       form.name = newStored.name;
+      // 3. ONLY CREATE IF TRULY NOT FOUND
+      console.log("[Settings] Creating new store for first-time admin...");
+      const newSubdomain = `shop-${Math.random().toString(36).substring(7)}`;
+      const { data: newStore, error: createError } = await supabase
+        .from("stores")
+        .insert({
+          owner_id: authStore.user.id,
+          name: "Toko Baru Saya",
+          subdomain: newSubdomain
+        })
+        .select()
+        .single();
+
+      if (createError) throw createError;
+      if (newStore) {
+        form.id = newStore.id;
+        form.owner_id = newStore.owner_id;
+        form.name = newStore.name;
+        form.subdomain = newStore.subdomain;
+      }
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Fetch settings error:", err);
+    errorMsg.value = `Failed to load settings: ${err.message || "Unknown error"}`;
   } finally {
     loading.value = false;
   }
@@ -224,6 +248,7 @@ async function saveSettings() {
         name: form.name,
         description: form.description,
         logo_url: form.logo_url,
+        subdomain: form.subdomain,
         shopee_affiliate_id: form.shopee_affiliate_id,
         tiktok_affiliate_id: form.tiktok_affiliate_id
       })
@@ -232,35 +257,45 @@ async function saveSettings() {
     if (error) throw error;
     
     // UPDATE GLOBAL STORE
-    await settingsStore.fetchSettings();
+    await settingsStore.fetchSettings(authStore.user?.id);
     
     showSuccess.value = true;
     setTimeout(() => showSuccess.value = false, 3000);
-  } catch (err) {
-    alert("Gagal menyimpan pengaturan.");
-    console.error(err);
+  } catch (err: any) {
+    alert(`Gagal menyimpan: ${err.message || "Unknown error"}. Pastikan SQL Update sudah dijalankan.`);
+    console.error("Save settings error detail:", err);
   } finally {
     saving.value = false;
   }
 }
-
+// ... (onLogoChange remains same)
 async function onLogoChange(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (!file) return;
-
   try {
     saving.value = true;
     const publicUrl = await productStore.uploadImage(file, "brand");
     form.logo_url = publicUrl;
-  } catch (err) {
-    alert("Gagal upload logo.");
+  } catch (err: any) {
+    alert("Gagal upload logo: " + (err.message || "Unknown error"));
   } finally {
     saving.value = false;
   }
 }
 
-onMounted(() => {
-  fetchStoreSettings();
+// MONITOR AUTH STATE: Only fetch store AFTER login is officially loaded
+watch(() => authStore.user?.id, async (newId) => {
+  if (newId) {
+    console.log("[Settings] Admin ID Detected:", newId);
+    await fetchStoreSettings();
+  }
+}, { immediate: true });
+
+onMounted(async () => {
+  // If user is already loaded (from cache/previous session)
+  if (authStore.user?.id) {
+    await fetchStoreSettings();
+  }
 });
 </script>
 

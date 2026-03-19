@@ -11,10 +11,26 @@ import { useAuthStore } from "@/stores/auth";
 
 const router = createRouter({
   history: createWebHistory(),
+  scrollBehavior: (to, from, savedPosition) => {
+    return savedPosition || { top: 0 }
+  },
   routes: [
     { path: "/", name: "landing", component: LandingPage },
     { path: "/auth", name: "auth", component: AuthPage },
     { path: "/checkout", name: "checkout", component: CheckoutPage, meta: { requiresAuth: true } },
+
+    // Privacy & Terms
+    {
+      path: "/privacy",
+      name: "privacy",
+      component: () => import("@/pages/Privacy.vue")
+    },
+    {
+      path: "/terms",
+      name: "terms",
+      component: () => import("@/pages/Terms.vue")
+    },
+
     {
       path: "/my-orders",
       name: "my-orders",
@@ -40,17 +56,17 @@ router.beforeEach(async (to) => {
 
   // WAIT FOR INITIALIZATION
   if (!authStore.initialized) {
-     await authStore.init();
+    await authStore.init();
   }
 
   // PROTECTED ROUTES (AUTH)
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
-     return { name: "auth", query: { redirect: to.fullPath } };
+    return { name: "auth", query: { redirect: to.fullPath } };
   }
 
   // PROTECTED ROUTES (ADMIN)
   if (to.meta.requiresAdmin && !authStore.isAdmin) {
-     return { name: "landing" };
+    return { name: "landing" };
   }
 
   return true;
